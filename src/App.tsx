@@ -179,9 +179,12 @@ function AppContent() {
         onSelectCategory={(cat) => setActiveCategory(cat)}
       />
 
-      <main className="flex-1 pb-16 relative z-10 space-y-10">
+      <main className="flex-1 pb-16 relative z-10 space-y-6 sm:space-y-8">
         {/* 3. Universal Dropzone Hero */}
-        <UniversalDropzone onLaunchToolWithFile={handleLaunchToolWithFile} />
+        <UniversalDropzone 
+          onLaunchToolWithFile={handleLaunchToolWithFile} 
+          onSelectTool={handleSelectTool}
+        />
 
         {/* 4. Real-time Air-Gap Security Shield & Competitor Battle Matrix */}
         <AirGapShield />

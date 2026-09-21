@@ -8,7 +8,11 @@ import {
   ShieldCheck,
   Zap,
   Lock,
-  Cpu
+  Layers,
+  FileSpreadsheet,
+  FileCode,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 import { sfx } from '@/core/audio/sfx';
 import { ToolDefinition } from '@/core/types/tool';
@@ -16,9 +20,22 @@ import { getToolById } from '@/core/registry/tools';
 
 interface UniversalDropzoneProps {
   onLaunchToolWithFile: (tool: ToolDefinition, file: File) => void;
+  onSelectTool?: (tool: ToolDefinition) => void;
 }
 
-export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchToolWithFile }) => {
+const POPULAR_SHORTCUTS = [
+  { id: 'word-to-pdf', label: 'Word to PDF', icon: FileText, color: 'text-amber-400 hover:border-amber-500/50 hover:bg-amber-500/10' },
+  { id: 'merge-pdf', label: 'Merge PDF', icon: Layers, color: 'text-cyan-400 hover:border-cyan-500/50 hover:bg-cyan-500/10' },
+  { id: 'compress-pdf', label: 'Compress PDF', icon: Zap, color: 'text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10' },
+  { id: 'excel-to-pdf', label: 'Excel to PDF', icon: FileSpreadsheet, color: 'text-teal-400 hover:border-teal-500/50 hover:bg-teal-500/10' },
+  { id: 'edit-pdf-text', label: 'Edit PDF', icon: FileCode, color: 'text-violet-400 hover:border-violet-500/50 hover:bg-violet-500/10' },
+  { id: 'chat-with-pdf', label: 'AI Chat PDF', icon: Bot, color: 'text-pink-400 hover:border-pink-500/50 hover:bg-pink-500/10' },
+];
+
+export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ 
+  onLaunchToolWithFile,
+  onSelectTool 
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +75,7 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchTo
     const toolIds: string[] = [];
 
     if (ext === 'pdf') {
-      toolIds.push('compress-pdf', 'edit-pdf-text', 'auto-redact-pii', 'chat-with-pdf', 'pdf-to-word', 'sign-pdf');
+      toolIds.push('compress-pdf', 'edit-pdf-text', 'word-to-pdf', 'chat-with-pdf', 'pdf-to-word', 'sign-pdf');
     } else if (['doc', 'docx'].includes(ext || '')) {
       toolIds.push('word-to-pdf');
     } else if (['xls', 'xlsx'].includes(ext || '')) {
@@ -81,50 +98,37 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchTo
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-8 text-center space-y-7">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-3 sm:pt-5 pb-4 text-center space-y-4 sm:space-y-5">
       
-      {/* Dynamic Master Headline */}
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-amber-500/30 text-xs font-medium backdrop-blur-xl shadow-lg shadow-amber-500/10">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-          <span className="font-fira font-semibold text-amber-300">
-            AIR-GAP AIR-LOCK // 0 BYTES UPLOADED // CLIENT-SIDE ONLY
-          </span>
+      {/* Catchy, Compact Modern Header */}
+      <div className="space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-fira font-semibold text-amber-300 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+          <span>100% PRIVATE • ZERO SERVER UPLOADS • IN-RAM ONLY</span>
         </div>
         
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-orbitron font-extrabold tracking-tight leading-[1.1] space-y-2">
-          <div className="text-titanium-chrome tracking-wider">
-            SOVEREIGN PDF
-          </div>
-          <div className="text-plasma-gradient tracking-wide">
-            MEGA-WORKSTATION
-          </div>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-extrabold tracking-tight text-white leading-tight">
+          All-in-One <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-emerald-400">PDF Workstation</span>
         </h1>
         
-        <p className="text-slate-300 max-w-2xl mx-auto text-xs sm:text-sm font-fira leading-relaxed">
-          Zero cloud data surveillance. 73+ high-precision tools executing 100% locally inside your browser's private memory with multi-threaded WebAssembly.
+        <p className="text-slate-400 max-w-xl mx-auto text-xs sm:text-sm font-fira leading-relaxed">
+          Convert, edit, merge, and compress PDFs instantly in your browser with 73+ free sovereign tools.
         </p>
       </div>
 
-      {/* Holographic Quantum Intake Portal */}
+      {/* High-Impact Interactive Dropzone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`relative rounded-3xl p-8 sm:p-12 transition-all duration-300 border ${
+        className={`relative rounded-2xl p-5 sm:p-7 transition-all duration-300 border ${
           isDragging
-            ? 'border-emerald-400 bg-emerald-500/10 scale-[1.01] shadow-2xl shadow-emerald-500/20 ring-2 ring-emerald-400/50'
+            ? 'border-emerald-400 bg-emerald-500/15 scale-[1.01] shadow-2xl shadow-emerald-500/25 ring-2 ring-emerald-400/50'
             : selectedFile
             ? 'border-emerald-500/50 bg-emerald-950/20 shadow-xl'
-            : 'border-white/10 bg-[#0a0d16]/80 backdrop-blur-2xl hover:border-amber-500/40 hover:bg-[#0c101c]/90 shadow-2xl'
+            : 'border-white/15 bg-[#0a0d16]/90 backdrop-blur-xl hover:border-amber-500/40 hover:bg-[#0c101c]/95 shadow-xl'
         }`}
       >
-        {/* Holographic Corner Reticles */}
-        <div className="absolute top-3 left-3 w-3.5 h-3.5 border-t-2 border-l-2 border-amber-400/60" />
-        <div className="absolute top-3 right-3 w-3.5 h-3.5 border-t-2 border-r-2 border-amber-400/60" />
-        <div className="absolute bottom-3 left-3 w-3.5 h-3.5 border-b-2 border-l-2 border-amber-400/60" />
-        <div className="absolute bottom-3 right-3 w-3.5 h-3.5 border-b-2 border-r-2 border-amber-400/60" />
-
         <input
           ref={fileInputRef}
           type="file"
@@ -133,89 +137,82 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchTo
         />
 
         {!selectedFile ? (
-          /* STATE A: IDLE HOLOGRAPHIC INTAKE PORTAL */
-          <div className="flex flex-col items-center justify-center space-y-5">
-            {/* Cybernetic Rotating Aperture & Core Icon */}
-            <div className="relative w-22 h-22 flex items-center justify-center group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              {/* Outer Rotating Cyber Ring */}
-              <div className="absolute inset-0 rounded-2xl border border-dashed border-amber-400/30 animate-spin-slow" />
-              {/* Inner Counter-Rotating Reticle */}
-              <div className="absolute inset-1.5 rounded-2xl border border-emerald-400/20 animate-spin-reverse-slow" />
-              {/* Core Icon Box */}
-              <div className="relative w-16 h-16 rounded-xl bg-gradient-to-tr from-amber-500/20 via-emerald-500/20 to-indigo-500/20 border border-white/15 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:border-amber-400/40 transition-all duration-300">
-                <UploadCloud className="w-8 h-8 text-amber-300 group-hover:text-amber-200 transition-colors" />
-              </div>
+          /* STATE A: IDLE DROPZONE WITH INSTANT SELECT BUTTON */
+          <div className="flex flex-col items-center justify-center space-y-3.5">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col sm:flex-row items-center gap-3 cursor-pointer group"
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sfx.playClick();
+                  fileInputRef.current?.click();
+                }}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-orbitron font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]"
+              >
+                <UploadCloud className="w-4 h-4 text-slate-950" />
+                <span>Select or Drop Document</span>
+              </button>
+              
+              <span className="text-xs font-fira text-slate-400">
+                or drag & drop files here
+              </span>
             </div>
 
-            <div className="space-y-1.5">
-              <h3 className="text-lg sm:text-xl font-bold text-white font-orbitron tracking-wide">
-                Drag & drop document here, or{' '}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-amber-400 underline underline-offset-4 hover:text-amber-300 font-semibold cursor-pointer"
-                >
-                  browse device
-                </button>
-              </h3>
-              <p className="text-xs text-slate-300 font-fira">
-                Instant in-RAM intake for PDF, Office, Vector, Audio & Document Formats
-              </p>
-            </div>
-
-            {/* Supported Format Chips with Cyber Glow Dots */}
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            {/* Supported Format Chips */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
               {[
-                { ext: '.PDF', color: 'bg-amber-400' },
-                { ext: '.DOCX', color: 'bg-blue-400' },
-                { ext: '.XLSX', color: 'bg-emerald-400' },
-                { ext: '.PPTX', color: 'bg-orange-400' },
-                { ext: '.PNG / JPG', color: 'bg-cyan-400' },
-                { ext: '.MP3 (TTS)', color: 'bg-purple-400' },
-                { ext: '.MD', color: 'bg-slate-300' },
-                { ext: '.EPUB', color: 'bg-teal-400' },
+                { ext: 'PDF', color: 'bg-amber-400' },
+                { ext: 'DOCX', color: 'bg-blue-400' },
+                { ext: 'XLSX', color: 'bg-emerald-400' },
+                { ext: 'PPTX', color: 'bg-orange-400' },
+                { ext: 'JPG/PNG', color: 'bg-cyan-400' },
+                { ext: 'AUDIO', color: 'bg-purple-400' },
+                { ext: 'EPUB', color: 'bg-teal-400' },
               ].map((item) => (
                 <span 
                   key={item.ext} 
-                  className="px-2.5 py-1 text-[11px] font-fira font-medium rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:border-amber-500/40 flex items-center gap-1.5 transition-all"
+                  className="px-2 py-0.5 text-[10px] font-fira font-medium rounded-md bg-white/[0.04] border border-white/10 text-slate-300 flex items-center gap-1"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${item.color}`} />
-                  <span>{item.ext}</span>
+                  <span>.{item.ext}</span>
                 </span>
               ))}
             </div>
           </div>
         ) : (
-          /* STATE B: FILE LOADED WITH SMART ACTION CHIPS */
-          <div className="space-y-6">
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.05] border border-emerald-500/30 max-w-lg mx-auto shadow-lg">
-              <div className="flex items-center gap-3 text-left">
-                <div className="p-3 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  <FileText className="w-6 h-6" />
+          /* STATE B: FILE LOADED WITH SMART ACTIONS */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.05] border border-emerald-500/30 max-w-lg mx-auto shadow-md">
+              <div className="flex items-center gap-3 text-left min-w-0">
+                <div className="p-2.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                  <FileText className="w-5 h-5" />
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-white line-clamp-1">{selectedFile.name}</h4>
-                  <p className="text-xs text-slate-300 font-fira flex items-center gap-2">
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-xs sm:text-sm text-white truncate">{selectedFile.name}</h4>
+                  <p className="text-[11px] text-slate-300 font-fira flex items-center gap-2">
                     <span>{formatFileSize(selectedFile.size)}</span>
                     <span>•</span>
                     <span className="text-emerald-400 flex items-center gap-1 font-semibold">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> 100% In-RAM Isolated
+                      <CheckCircle2 className="w-3 h-3" /> Ready in-memory
                     </span>
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedFile(null)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer shrink-0 ml-2"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Smart Suggested Action Buttons */}
-            <div className="space-y-2.5 max-w-xl mx-auto">
-              <p className="text-xs font-fira text-amber-300 uppercase tracking-wider font-semibold">
-                Select an operation to execute on this document:
+            {/* Suggested Operations */}
+            <div className="space-y-2 max-w-xl mx-auto">
+              <p className="text-[11px] font-fira text-amber-300 uppercase tracking-wider font-semibold">
+                Choose an action to perform:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {getSmartToolSuggestions(selectedFile).map((tool) => (
@@ -225,15 +222,15 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchTo
                       sfx.playSuccess();
                       onLaunchToolWithFile(tool, selectedFile);
                     }}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.06] hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/40 text-left transition-all group cursor-pointer"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.06] hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/40 text-left transition-all group cursor-pointer"
                   >
-                    <div>
-                      <span className="text-xs font-semibold text-white group-hover:text-amber-300 transition-colors">
+                    <div className="min-w-0 pr-2">
+                      <span className="text-xs font-semibold text-white group-hover:text-amber-300 transition-colors block truncate">
                         {tool.title}
                       </span>
-                      <p className="text-[10px] text-slate-400 line-clamp-1 font-fira">{tool.description}</p>
+                      <p className="text-[10px] text-slate-400 truncate font-fira">{tool.description}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </button>
                 ))}
               </div>
@@ -242,6 +239,35 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({ onLaunchTo
         )}
 
       </div>
+
+      {/* Quick 1-Click Popular Tool Shortcuts */}
+      <div className="pt-1">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-[11px] font-fira text-slate-500 uppercase tracking-wider mr-1 hidden sm:inline">
+            Popular:
+          </span>
+          {POPULAR_SHORTCUTS.map((item) => {
+            const Icon = item.icon;
+            const toolDef = getToolById(item.id);
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  sfx.playClick();
+                  if (toolDef && onSelectTool) {
+                    onSelectTool(toolDef);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-fira text-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${item.color}`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 };

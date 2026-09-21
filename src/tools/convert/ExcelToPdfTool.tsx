@@ -7,7 +7,8 @@ import {
   Loader2, 
   Download, 
   Table, 
-  Layers 
+  Layers,
+  FileSpreadsheet
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
