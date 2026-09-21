@@ -12,6 +12,7 @@ import {
 import * as XLSX from 'xlsx';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { downloadUint8Array } from '@/core/utils/download';
+import { sanitizeForPdf } from '@/core/utils/pdfText';
 import { sfx } from '@/core/audio/sfx';
 import confetti from 'canvas-confetti';
 
@@ -32,7 +33,7 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ preloadedFile, o
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    if (preloadedFile && (preloadedFile.name.endsWith('.xlsx') || preloadedFile.name.endsWith('.xls') || preloadedFile.name.endsWith('.csv'))) {
+    if (preloadedFile && (preloadedFile.name.toLowerCase().endsWith('.xlsx') || preloadedFile.name.toLowerCase().endsWith('.xls') || preloadedFile.name.toLowerCase().endsWith('.csv'))) {
       loadSpreadsheet(preloadedFile);
     }
   }, [preloadedFile]);
@@ -90,8 +91,9 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ preloadedFile, o
 
       let y = pageHeight - 50;
 
-      // Title & Sheet Name
-      page.drawText(`${file.name} - [Sheet: ${activeSheet}]`, {
+      // Title & Sheet Name (Safe Sanitized)
+      const cleanTitle = sanitizeForPdf(`${file.name} - [Sheet: ${activeSheet}]`);
+      page.drawText(cleanTitle, {
         x: 40,
         y,
         size: 14,
@@ -132,7 +134,7 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ preloadedFile, o
         }
 
         for (let c = 0; c < colCount; c++) {
-          const cellVal = String(row[c] || '').slice(0, 20);
+          const cellVal = sanitizeForPdf(String(row[c] || '').slice(0, 20));
           page.drawText(cellVal, {
             x: 45 + c * colWidth,
             y,
@@ -146,7 +148,8 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ preloadedFile, o
       }
 
       const pdfBytes = await doc.save();
-      downloadUint8Array(pdfBytes, `${file.name.replace(/\.[^/.]+$/, '')}_ledger.pdf`);
+      const outputFilename = `${sanitizeForPdf(file.name.replace(/\.[^/.]+$/, ''))}_ledger.pdf`;
+      downloadUint8Array(pdfBytes, outputFilename);
 
       setIsCompleted(true);
       sfx.playSuccess();
