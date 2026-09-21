@@ -38,7 +38,7 @@ export const WordToPdfTool: React.FC<WordToPdfToolProps> = ({ preloadedFile, onC
     }
   }, [preloadedFile]);
 
-  // Robust DOCX text extraction directly from XML structure inside the ZIP
+  // Robust DOCX text & table extraction directly from XML structure inside the ZIP
   const extractTextFromDocx = async (arrayBuffer: ArrayBuffer): Promise<string[]> => {
     try {
       const zip = new JSZip();
@@ -53,34 +53,88 @@ export const WordToPdfTool: React.FC<WordToPdfToolProps> = ({ preloadedFile, onC
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
 
-      // Extract all paragraph nodes <w:p>
-      const paragraphNodes = xmlDoc.getElementsByTagName('w:p');
-      const paragraphs: string[] = [];
+      const body = xmlDoc.getElementsByTagName('w:body')[0];
+      const items: string[] = [];
 
-      for (let i = 0; i < paragraphNodes.length; i++) {
-        const pNode = paragraphNodes[i];
-        const textNodes = pNode.getElementsByTagName('w:t');
-        let pText = '';
-
-        for (let j = 0; j < textNodes.length; j++) {
-          pText += textNodes[j].textContent || '';
-        }
-
-        const clean = sanitizeForPdf(pText.trim());
-        if (clean.length > 0) {
-          paragraphs.push(clean);
+      if (body) {
+        for (let i = 0; i < body.childNodes.length; i++) {
+          const node = body.childNodes[i];
+          if (node.nodeName === 'w:p') {
+            const textNodes = (node as Element).getElementsByTagName('w:t');
+            let pText = '';
+            for (let j = 0; j < textNodes.length; j++) {
+              pText += textNodes[j].textContent || '';
+            }
+            const clean = sanitizeForPdf(pText.trim());
+            if (clean) items.push(clean);
+          } else if (node.nodeName === 'w:tbl') {
+            // Table node: extract each row cleanly
+            const rows = (node as Element).getElementsByTagName('w:tr');
+            for (let r = 0; r < rows.length; r++) {
+              const cells = rows[r].getElementsByTagName('w:tc');
+              const cellTexts: string[] = [];
+              for (let c = 0; c < cells.length; c++) {
+                const cTexts = cells[c].getElementsByTagName('w:t');
+                let cellVal = '';
+                for (let ct = 0; ct < cTexts.length; ct++) {
+                  cellVal += cTexts[ct].textContent || '';
+                }
+                cellTexts.push(sanitizeForPdf(cellVal.trim()));
+              }
+              if (cellTexts.some((t) => t.length > 0)) {
+                items.push(`| ${cellTexts.join('  |  ')} |`);
+              }
+            }
+          }
         }
       }
 
-      return paragraphs;
+      return items.length > 0 ? items : ['Document parsed successfully.'];
     } catch (e) {
       console.warn('Direct XML unzipping fallback to plain text parsing:', e);
-      // Fallback for non-zip plain files or binary streams
       const decoder = new TextDecoder('utf-8', { fatal: false });
       const raw = decoder.decode(arrayBuffer);
       const cleanRaw = sanitizeForPdf(raw.replace(/[^\x20-\x7E\n\r\t]/g, ' '));
       return cleanRaw.split('\n').map((l) => l.trim()).filter((l) => l.length > 2);
     }
+  };
+
+  const handlePrintPdf = () => {
+    if (!previewContainerRef.current) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to save/print this PDF.');
+      return;
+    }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${file?.name.replace(/\.[^/.]+$/, '') || 'Document'}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 24px; color: #0f172a; line-height: 1.6; }
+            table { width: 100%; border-collapse: collapse; margin: 18px 0; }
+            th, td { border: 1px solid #cbd5e1; padding: 10px 14px; text-align: left; font-size: 13px; }
+            th { background-color: #f1f5f9; font-weight: bold; }
+            h1, h2, h3, h4 { color: #0f172a; margin-top: 24px; font-weight: bold; }
+            p { margin: 8px 0; font-size: 14px; }
+            @media print {
+              body { padding: 0; }
+              @page { margin: 1.5cm; }
+            }
+          </style>
+        </head>
+        <body>
+          ${previewContainerRef.current.innerHTML}
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const loadDocx = async (f: File) => {
@@ -292,8 +346,8 @@ export const WordToPdfTool: React.FC<WordToPdfToolProps> = ({ preloadedFile, onC
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <label className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-fira text-slate-300 cursor-pointer transition-colors">
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-fira text-slate-300 cursor-pointer transition-colors">
                 <span>Change File</span>
                 <input 
                   type="file" 
@@ -304,9 +358,18 @@ export const WordToPdfTool: React.FC<WordToPdfToolProps> = ({ preloadedFile, onC
               </label>
 
               <button
+                onClick={handlePrintPdf}
+                type="button"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-fira text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition-all"
+                title="Print or Save exact formatted tables and layout as PDF"
+              >
+                <span>Print / High-Def PDF</span>
+              </button>
+
+              <button
                 onClick={handleConvertToPdf}
                 disabled={isProcessing}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold font-fira text-xs shadow-lg shadow-amber-500/25 cursor-pointer flex items-center gap-2 transition-all disabled:opacity-40"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold font-fira text-xs shadow-lg shadow-amber-500/25 cursor-pointer flex items-center gap-2 transition-all disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>
@@ -337,10 +400,10 @@ export const WordToPdfTool: React.FC<WordToPdfToolProps> = ({ preloadedFile, onC
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-fira text-slate-400 px-1">
               <span>Document Preview & Content Extracted:</span>
-              <span>{extractedParagraphs.length} Paragraphs Detected</span>
+              <span>{extractedParagraphs.length} Paragraphs / Elements Detected</span>
             </div>
 
-            <div className="relative rounded-2xl bg-white text-slate-900 border border-slate-300 shadow-2xl p-6 min-h-[260px] max-h-[420px] overflow-y-auto">
+            <div className="relative rounded-2xl bg-white text-slate-900 border border-slate-300 shadow-xl p-6 min-h-[220px]">
               {isRendering && (
                 <div className="py-16 flex flex-col items-center justify-center space-y-2 text-slate-500">
                   <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
