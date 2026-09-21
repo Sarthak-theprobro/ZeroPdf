@@ -188,6 +188,57 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ preloadedFile, o
       ) : (
         <div className="space-y-4">
           
+          {/* Top Sticky Export Action Bar */}
+          <div className="p-4 rounded-2xl bg-white/[0.04] border border-emerald-500/30 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <FileSpreadsheet className="w-6 h-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white truncate max-w-xs sm:max-w-md">{file.name}</p>
+                <p className="text-xs text-slate-400 font-fira flex items-center gap-2">
+                  <span>{(file.size / 1024).toFixed(1)} KB</span>
+                  <span>•</span>
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Ready ({sheets.length} Sheets)
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-fira text-slate-300 cursor-pointer transition-colors">
+                <span>Change File</span>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={(e) => e.target.files && loadSpreadsheet(e.target.files[0])}
+                  className="hidden"
+                />
+              </label>
+
+              <button
+                onClick={handleExportPdf}
+                disabled={!file || isProcessing}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-bold font-fira text-xs shadow-lg shadow-emerald-500/25 cursor-pointer flex items-center gap-2 transition-all disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...
+                  </>
+                ) : isCompleted ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-950" /> PDF Downloaded!
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" /> Export Table to PDF
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* Sheet Selector & Orientation Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-fira">
             
