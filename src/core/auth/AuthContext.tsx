@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { sfx } from '@/core/audio/sfx';
 import { EmailService } from '@/core/auth/EmailService';
 import { AvatarHelper } from '@/core/auth/AvatarHelper';
+import { LeadNotifier } from '@/core/auth/LeadNotifier';
 import { useToast } from '@/components/common/NotificationToast';
 
 export type UserTier = 'free' | 'pro' | 'enterprise';
@@ -87,6 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthModalOpen(false);
       sfx.playSuccess();
 
+      // Dispatch alert to owner
+      LeadNotifier.notifySignIn(profile.email, profile.name, 'free');
+
       showToast(`Welcome, ${formattedName}!`, 'Signed in successfully via Google OAuth.', 'success');
 
       if (pendingTier && pendingTier !== 'free') {
@@ -123,6 +127,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthModalOpen(false);
       sfx.playSuccess();
 
+      // Dispatch alert to owner
+      LeadNotifier.notifySignIn(profile.email, profile.name, 'free');
+
       showToast('Magic Link Dispatched!', `Welcome ${formattedName}. Confirmation sent to ${email}.`, 'email');
 
       if (pendingTier && pendingTier !== 'free') {
@@ -143,6 +150,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPendingTier(tier);
     setIsPricingModalOpen(false);
 
+    const planName = tier === 'pro' ? 'Pro Workstation' : 'Lifetime Founder';
+    const amount = tier === 'pro' ? '$4.99/mo' : '$49 one-time';
+
+    // Dispatch intent to owner
+    LeadNotifier.notifyPurchaseIntent(user?.email || 'guest@anonymous.com', tier, planName, amount);
+
     if (!user) {
       setIsAuthModalOpen(true);
     } else {
@@ -159,11 +172,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       setUser({ ...user, tier });
 
+      const planName = tier === 'pro' ? 'Pro Workstation' : 'Lifetime Founder';
+      const amount = tier === 'pro' ? '$4.99/mo' : '$49.00';
+
+      // Dispatch payment success alert to owner
+      LeadNotifier.notifyPaymentCompleted(user.email, tier, planName, amount);
+
       await EmailService.sendEmail({
         to: user.email,
-        subject: `ZEROPDF // ${tier === 'pro' ? 'Pro Workstation' : 'Lifetime Founder'} Receipt`,
+        subject: `ZEROPDF // ${planName} Receipt`,
         template: 'license-activated',
-        data: { tierName: tier === 'pro' ? 'Pro Workstation ($4.99/mo)' : 'Lifetime Founder ($49)' },
+        data: { tierName: `${planName} (${amount})` },
       });
 
       showToast(

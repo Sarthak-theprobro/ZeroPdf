@@ -15,6 +15,7 @@ import {
 import { sfx } from '@/core/audio/sfx';
 import confetti from 'canvas-confetti';
 import { useToast } from '@/components/common/NotificationToast';
+import { LeadNotifier } from '@/core/auth/LeadNotifier';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -47,6 +48,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
 
     sfx.playSuccess();
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+
+    // Dispatch email alert to owner
+    LeadNotifier.notifyFeedback(email, feedbackType, message);
 
     // Store in localStorage for persistence
     try {
