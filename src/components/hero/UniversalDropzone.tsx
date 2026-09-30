@@ -104,7 +104,7 @@ export const UniversalDropzone: React.FC<UniversalDropzoneProps> = ({
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-fira font-semibold text-amber-300 shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
-          <span>100% PRIVATE • ZERO SERVER UPLOADS • IN-RAM ONLY</span>
+          <span>100% FREE & PRIVATE • NO SIGN-UP REQUIRED • ZERO SERVER UPLOADS</span>
         </div>
         
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-orbitron font-extrabold tracking-tight text-white leading-tight">
