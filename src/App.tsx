@@ -207,25 +207,25 @@ function AppContent() {
         onSelectCategory={(cat) => setActiveCategory(cat)}
       />
 
-      <main className="flex-1 pb-16 relative z-10 space-y-6 sm:space-y-8">
+      <main className="flex-1 pb-16 relative z-10 space-y-8 sm:space-y-12">
         {/* 3. Universal Dropzone Hero */}
         <UniversalDropzone 
           onLaunchToolWithFile={handleLaunchToolWithFile} 
           onSelectTool={handleSelectTool}
         />
 
-        {/* 4. Real-time Air-Gap Security Shield & Competitor Battle Matrix */}
-        <AirGapShield />
-
-        {/* 5. Parallel Multi-File Batch Automation Engine */}
-        <BatchProcessingHub />
-
-        {/* 6. Categorized Tools Grid (All 8 Hubs) */}
+        {/* 4. Categorized Tools Grid (All 8 Hubs) - Direct access like ILovePDF & Adobe */}
         <ToolGrid 
           onSelectTool={handleSelectTool} 
           activeCategory={activeCategory} 
           onSelectCategory={(cat) => setActiveCategory(cat)} 
         />
+
+        {/* 5. Real-time Air-Gap Security Shield & Competitor Battle Matrix */}
+        <AirGapShield />
+
+        {/* 6. Parallel Multi-File Batch Automation Engine */}
+        <BatchProcessingHub />
       </main>
 
       {/* 7. Comprehensive Industry Standard Footer */}
