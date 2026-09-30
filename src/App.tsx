@@ -14,6 +14,7 @@ import { UniversalDropzone } from '@/components/hero/UniversalDropzone';
 import { AirGapShield } from '@/components/hero/AirGapShield';
 import { BatchProcessingHub } from '@/components/hero/BatchProcessingHub';
 import { PhysicsBackground } from '@/components/hero/PhysicsBackground';
+import { StudioBackground } from '@/components/hero/StudioBackground';
 import { CommandPalette } from '@/components/command-palette/CommandPalette';
 import { ToolsDirectoryDrawer } from '@/components/hud/ToolsDirectoryDrawer';
 
@@ -126,12 +127,29 @@ import { FeedbackModal } from '@/components/common/FeedbackModal';
 
 function AppContent() {
   const { setIsPricingModalOpen } = useAuth();
+  const [bgTheme, setBgTheme] = useState<'studio' | 'cyber'>(() => {
+    try {
+      return (localStorage.getItem('zeropdf_bg_theme') as any) || 'studio';
+    } catch {
+      return 'studio';
+    }
+  });
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isToolsDrawerOpen, setIsToolsDrawerOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeTool, setActiveTool] = useState<ToolDefinition | null>(null);
   const [preloadedFile, setPreloadedFile] = useState<File | null>(null);
+
+  const handleToggleBgTheme = () => {
+    const next = bgTheme === 'studio' ? 'cyber' : 'studio';
+    setBgTheme(next);
+    try {
+      localStorage.setItem('zeropdf_bg_theme', next);
+    } catch (e) {
+      console.warn('Could not save theme preference:', e);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -162,10 +180,14 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col aurora-bg text-slate-100 relative selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen flex flex-col text-slate-100 relative selection:bg-cyan-500 selection:text-black">
       
-      {/* 1. Real-Time Interactive Particle Physics Gravity Background */}
-      <PhysicsBackground />
+      {/* 1. Dynamic Background: Studio Clean (Default, 120fps mobile) vs Cyber Horizon (Physics) */}
+      {bgTheme === 'cyber' ? (
+        <PhysicsBackground />
+      ) : (
+        <StudioBackground />
+      )}
 
       {/* 2. Top Studio Navbar */}
       <Navbar
@@ -173,6 +195,8 @@ function AppContent() {
         onOpenToolsDrawer={() => setIsToolsDrawerOpen(true)}
         activeCategory={activeCategory}
         onSelectCategory={(cat) => setActiveCategory(cat)}
+        bgTheme={bgTheme}
+        onToggleBgTheme={handleToggleBgTheme}
       />
 
       {/* 3. Slide-in Tools Directory Mega-Drawer */}

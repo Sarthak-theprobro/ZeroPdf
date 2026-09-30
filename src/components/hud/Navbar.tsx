@@ -9,7 +9,8 @@ import {
   Sparkles,
   ChevronDown,
   Menu,
-  Hexagon
+  Hexagon,
+  Layers
 } from "lucide-react";
 import { sfx } from "@/core/audio/sfx";
 import { PwaInstallBadge } from "@/components/hud/PwaInstallBadge";
@@ -20,12 +21,16 @@ interface NavbarProps {
   activeCategory: string;
   onSelectCategory: (category: string) => void;
   onOpenToolsDrawer?: () => void;
+  bgTheme?: 'studio' | 'cyber';
+  onToggleBgTheme?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenCommandPalette, 
   onSelectCategory,
-  onOpenToolsDrawer
+  onOpenToolsDrawer,
+  bgTheme = 'studio',
+  onToggleBgTheme
 }) => {
   const [isMuted, setIsMuted] = useState(sfx.getMuted());
   const { user, setIsAuthModalOpen, setIsPricingModalOpen, setIsProfileModalOpen } = useAuth();
@@ -177,6 +182,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {user.name.split(' ')[0]}
               </span>
               <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300 transition-colors" />
+            </button>
+          )}
+
+          {/* Background Theme Switcher (Studio Clean vs Cyber Horizon) */}
+          {onToggleBgTheme && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                onToggleBgTheme();
+              }}
+              title={bgTheme === 'studio' ? "Theme: Studio Clean (Fastest) — Click for Cyber Horizon FX" : "Theme: Cyber Horizon FX — Click for Studio Clean"}
+              className="h-9 px-2 sm:px-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-amber-500/30 flex items-center gap-1.5 text-slate-300 hover:text-white transition-all cursor-pointer shrink-0 text-xs font-fira"
+            >
+              {bgTheme === 'studio' ? (
+                <>
+                  <Layers className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <span className="hidden md:inline text-[11px] text-slate-400 font-medium">Clean</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="hidden md:inline text-[11px] text-amber-300 font-bold">Cyber</span>
+                </>
+              )}
             </button>
           )}
 
