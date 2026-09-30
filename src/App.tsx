@@ -119,12 +119,14 @@ import { GstFilingPrepTool } from '@/tools/business/GstFilingPrepTool';
 
 import { ToolDefinition } from '@/core/types/tool';
 import { sfx } from '@/core/audio/sfx';
-import { X, FileText, CheckCircle2 } from 'lucide-react';
+import { X, FileText, CheckCircle2, MessageSquarePlus } from 'lucide-react';
 import { IconRenderer } from '@/components/common/IconRenderer';
+import { FeedbackModal } from '@/components/common/FeedbackModal';
 
 function AppContent() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isToolsDrawerOpen, setIsToolsDrawerOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeTool, setActiveTool] = useState<ToolDefinition | null>(null);
   const [preloadedFile, setPreloadedFile] = useState<File | null>(null);
@@ -446,6 +448,27 @@ function AppContent() {
       <ProfileModal />
       <PricingModal />
       <PaymentCheckoutModal />
+
+      {/* Floating Feedback & Feature Request Trigger */}
+      <div className="fixed bottom-12 right-4 sm:right-6 z-30">
+        <button
+          onClick={() => {
+            sfx.playClick();
+            setIsFeedbackModalOpen(true);
+          }}
+          className="px-3.5 py-2 rounded-2xl bg-[#0c101c]/95 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400 text-amber-300 font-fira text-xs font-semibold shadow-xl shadow-black/80 flex items-center gap-2 backdrop-blur-xl transition-all cursor-pointer group hover:scale-105 active:scale-95"
+          title="Share feedback, report a bug, or request a new tool"
+        >
+          <MessageSquarePlus className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span className="hidden sm:inline">Feedback & Ideas</span>
+          <span className="sm:hidden">Feedback</span>
+        </button>
+      </div>
+
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+      />
 
       {/* Engine Status Bar */}
       <TelemetryBar />
