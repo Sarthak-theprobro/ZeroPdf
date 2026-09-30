@@ -110,18 +110,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* 3. RIGHT: ACTION PILLS & PROFILE CHIP */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Pro Upgrade / Active Badge */}
+          {/* 100% Free Trust Badge / Plans Trigger */}
           {(!user || user.tier === 'free') ? (
             <button
               onClick={() => {
                 sfx.playClick();
                 setIsPricingModalOpen(true);
               }}
-              className="h-9 px-3 sm:px-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-fira text-xs font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shimmer-effect"
+              className="h-9 px-2.5 sm:px-3.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400 text-emerald-300 font-fira text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-sm"
+              title="All 73+ Tools are 100% Free • No Sign-Up Required"
             >
-              <Crown className="w-3.5 h-3.5 fill-slate-950 stroke-none shrink-0" />
-              <span className="hidden xs:inline">Pro $4.99</span>
-              <span className="xs:hidden">$4.99</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="hidden sm:inline">100% Free • No Login</span>
+              <span className="sm:hidden">Free (No Login)</span>
             </button>
           ) : (
             <button
