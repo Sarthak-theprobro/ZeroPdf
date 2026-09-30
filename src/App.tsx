@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { ToastProvider } from '@/components/common/NotificationToast';
-import { AuthProvider } from '@/core/auth/AuthContext';
+import { AuthProvider, useAuth } from '@/core/auth/AuthContext';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ProfileModal } from '@/components/auth/ProfileModal';
 import { PricingModal } from '@/components/pricing/PricingModal';
 import { PaymentCheckoutModal } from '@/components/pricing/PaymentCheckoutModal';
 import { Navbar } from '@/components/hud/Navbar';
+import { Footer } from '@/components/hud/Footer';
 import { TelemetryBar } from '@/components/hud/TelemetryBar';
 import { ToolGrid } from '@/components/hud/ToolGrid';
 import { UniversalDropzone } from '@/components/hero/UniversalDropzone';
@@ -124,6 +125,7 @@ import { IconRenderer } from '@/components/common/IconRenderer';
 import { FeedbackModal } from '@/components/common/FeedbackModal';
 
 function AppContent() {
+  const { setIsPricingModalOpen } = useAuth();
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isToolsDrawerOpen, setIsToolsDrawerOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -201,6 +203,13 @@ function AppContent() {
           onSelectCategory={(cat) => setActiveCategory(cat)} 
         />
       </main>
+
+      {/* 7. Comprehensive Industry Standard Footer */}
+      <Footer 
+        onSelectTool={handleSelectTool}
+        onOpenFeedback={() => setIsFeedbackModalOpen(true)}
+        onOpenPricing={() => setIsPricingModalOpen(true)}
+      />
 
       {/* Interactive Tool Modal */}
       {activeTool && (
